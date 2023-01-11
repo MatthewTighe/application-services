@@ -1,0 +1,22 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+namespace remotesettings {};
+
+dictionary RemoteSettingsConfig {
+    string? server_url;
+    string? bucket_name;
+    string collection_name;
+};
+
+enum RemoteSettingsError {
+    "NetworkFailure"
+};
+
+interface RemoteSettings {
+    constructor(RemoteSettingsConfig? remote_settings_config);
+
+    [Throws=RemoteSettingsError]
+    string? get();
+};

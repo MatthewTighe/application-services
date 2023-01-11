@@ -99,6 +99,13 @@ projects:
     - name: nimbus
       type: aar
     description: The Nimbus SDK, compiled to work with the Application Services full-megazord.
+  remotesettings:
+    path: components/remote_settings/android
+    artifactId: remotesettings
+    publications:
+    - name: remotesettings
+      type: aar
+    description: A Remote Settings client
   full-megazord:
     uploadSymbols: true
     path: megazords/full/android
