@@ -1,0 +1,9 @@
+[package]
+name = "remote_settings"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+uniffi_build = { version = "^0.21", features = [ "builtin-bindgen" ] }

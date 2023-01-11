@@ -14,6 +14,7 @@ pub use nimbus;
 pub use places;
 pub use push;
 pub use rc_log_ffi;
+pub use remote_settings;
 pub use sync15;
 pub use tabs;
 pub use viaduct_reqwest;

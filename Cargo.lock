@@ -1776,6 +1776,7 @@ dependencies = [
  "places",
  "push",
  "rc_log_ffi",
+ "remote_settings",
  "sync_manager",
  "tabs",
  "viaduct",
@@ -1805,6 +1806,7 @@ dependencies = [
  "places",
  "push",
  "rc_log_ffi",
+ "remote_settings",
  "sync15",
  "tabs",
  "viaduct",
@@ -2804,6 +2806,13 @@ name = "regex-syntax"
 version = "0.6.27"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a3f87b73ce11b1619a3c6332f45341e0047173771e8b8b73f87bfeefb7b56244"
+
+[[package]]
+name = "remote_settings"
+version = "0.1.0"
+dependencies = [
+ "uniffi_build",
+]
 
 [[package]]
 name = "remove_dir_all"
