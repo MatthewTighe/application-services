@@ -4,8 +4,13 @@
 
  namespace remotesettings {};
 
- interface RemoteSettings {
+enum RemoteSettingsError {
+    "NetworkFailure"
+};
+
+interface RemoteSettings {
     constructor();
 
-    void get();
- };
+    [Throws=RemoteSettingsError]
+    string? get();
+};
