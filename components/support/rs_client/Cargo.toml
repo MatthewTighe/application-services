@@ -9,3 +9,7 @@ edition = "2021"
 url = "2.2"
 viaduct = { path = "../../viaduct" }
 thiserror = "1"
+
+[dev-dependencies]
+viaduct-reqwest = { path = "../viaduct-reqwest" }
+mockito = "0.31"
