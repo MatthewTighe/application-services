@@ -26,6 +26,7 @@ const HEADER_RETRY_AFTER: &str = "Retry-After";
 
 pub struct Client {
     pub(crate) base_url: Url,
+    pub(crate) bucket_name: String,
     pub(crate) collection_name: String,
     pub(crate) remote_state: Cell<RemoteState>,
 }
@@ -43,12 +44,25 @@ impl Client {
     #[allow(unused)]
     pub fn new(config: ClientConfig) -> Result<Self> {
         let server_url = config.server_url.unwrap_or_else(|| String::from(""));
-        let base_url = Url::parse(&server_url)?;
+        let bucket_name = config.bucket_name.unwrap_or_else(|| String::from("main"));
+
         Ok(Self {
-            base_url,
+            base_url: Url::parse(&server_url)?,
+            bucket_name: bucket_name,
             collection_name: config.collection_name,
             remote_state: Cell::new(RemoteState::Ok),
         })
+    }
+
+    pub fn get(&self) -> Result<Response> {
+        let path = format!(
+            "v1/buckets/{}/collections/{}/records",
+            &self.bucket_name,
+            &self.collection_name
+        );
+        let url = self.base_url.join(&path)?;
+        let req = Request::get(url);
+        self.make_request(req)
     }
 
     fn make_request(&self, request: Request) -> Result<Response> {
