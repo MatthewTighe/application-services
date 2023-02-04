@@ -79,84 +79,84 @@ fn test_fetch_experiments_from_schema() {
     )
 }
 
-#[test]
-fn test_backoff() {
-    viaduct_reqwest::use_reqwest_backend();
-    let m = mock(
-        "GET",
-        "/v1/buckets/main/collections/messaging-experiments/records",
-    )
-    .with_body(response_body())
-    .with_status(200)
-    .with_header("content-type", "application/json")
-    .with_header("Backoff", "60")
-    .create();
-    let config = RemoteSettingsConfig {
-        server_url: mockito::server_url(),
-        collection_name: "messaging-experiments".to_string(),
-    };
-    let http_client = Client::new(config).unwrap();
-    assert!(http_client.fetch_experiments().is_ok());
-    let second_request = http_client.fetch_experiments();
-    assert!(matches!(second_request, Err(NimbusError::BackoffError(_))));
-    m.expect(1).assert();
-}
+// #[test]
+// fn test_backoff() {
+//     viaduct_reqwest::use_reqwest_backend();
+//     let m = mock(
+//         "GET",
+//         "/v1/buckets/main/collections/messaging-experiments/records",
+//     )
+//     .with_body(response_body())
+//     .with_status(200)
+//     .with_header("content-type", "application/json")
+//     .with_header("Backoff", "60")
+//     .create();
+//     let config = RemoteSettingsConfig {
+//         server_url: mockito::server_url(),
+//         collection_name: "messaging-experiments".to_string(),
+//     };
+//     let http_client = Client::new(config).unwrap();
+//     assert!(http_client.fetch_experiments().is_ok());
+//     let second_request = http_client.fetch_experiments();
+//     assert!(matches!(second_request, Err(NimbusError::BackoffError(_))));
+//     m.expect(1).assert();
+// }
 
-#[test]
-fn test_500_retry_after() {
-    viaduct_reqwest::use_reqwest_backend();
-    let m = mock(
-        "GET",
-        "/v1/buckets/main/collections/messaging-experiments/records",
-    )
-    .with_body("Boom!")
-    .with_status(500)
-    .with_header("Retry-After", "60")
-    .create();
-    let config = RemoteSettingsConfig {
-        server_url: mockito::server_url(),
-        collection_name: "messaging-experiments".to_string(),
-    };
-    let http_client = Client::new(config).unwrap();
-    assert!(http_client.fetch_experiments().is_err());
-    let second_request = http_client.fetch_experiments();
-    assert!(matches!(second_request, Err(NimbusError::BackoffError(_))));
-    m.expect(1).assert();
-}
+// #[test]
+// fn test_500_retry_after() {
+//     viaduct_reqwest::use_reqwest_backend();
+//     let m = mock(
+//         "GET",
+//         "/v1/buckets/main/collections/messaging-experiments/records",
+//     )
+//     .with_body("Boom!")
+//     .with_status(500)
+//     .with_header("Retry-After", "60")
+//     .create();
+//     let config = RemoteSettingsConfig {
+//         server_url: mockito::server_url(),
+//         collection_name: "messaging-experiments".to_string(),
+//     };
+//     let http_client = Client::new(config).unwrap();
+//     assert!(http_client.fetch_experiments().is_err());
+//     let second_request = http_client.fetch_experiments();
+//     assert!(matches!(second_request, Err(NimbusError::BackoffError(_))));
+//     m.expect(1).assert();
+// }
 
-#[test]
-fn test_backoff_recovery() {
-    viaduct_reqwest::use_reqwest_backend();
-    let m = mock(
-        "GET",
-        "/v1/buckets/main/collections/messaging-experiments/records",
-    )
-    .with_body(response_body())
-    .with_status(200)
-    .with_header("content-type", "application/json")
-    .create();
-    let config = RemoteSettingsConfig {
-        server_url: mockito::server_url(),
-        collection_name: "messaging-experiments".to_string(),
-    };
-    let mut http_client = Client::new(config).unwrap();
-    // First, sanity check that manipulating the remote state does something.
-    http_client.remote_state.replace(RemoteState::Backoff {
-        observed_at: Instant::now(),
-        duration: Duration::from_secs(30),
-    });
-    assert!(matches!(
-        http_client.fetch_experiments(),
-        Err(NimbusError::BackoffError(_))
-    ));
-    // Then do the actual test.
-    http_client.remote_state = Cell::new(RemoteState::Backoff {
-        observed_at: Instant::now() - Duration::from_secs(31),
-        duration: Duration::from_secs(30),
-    });
-    assert!(http_client.fetch_experiments().is_ok());
-    m.expect(1).assert();
-}
+// #[test]
+// fn test_backoff_recovery() {
+//     viaduct_reqwest::use_reqwest_backend();
+//     let m = mock(
+//         "GET",
+//         "/v1/buckets/main/collections/messaging-experiments/records",
+//     )
+//     .with_body(response_body())
+//     .with_status(200)
+//     .with_header("content-type", "application/json")
+//     .create();
+//     let config = RemoteSettingsConfig {
+//         server_url: mockito::server_url(),
+//         collection_name: "messaging-experiments".to_string(),
+//     };
+//     let mut http_client = Client::new(config).unwrap();
+//     // First, sanity check that manipulating the remote state does something.
+//     http_client.remote_state.replace(RemoteState::Backoff {
+//         observed_at: Instant::now(),
+//         duration: Duration::from_secs(30),
+//     });
+//     assert!(matches!(
+//         http_client.fetch_experiments(),
+//         Err(NimbusError::BackoffError(_))
+//     ));
+//     // Then do the actual test.
+//     http_client.remote_state = Cell::new(RemoteState::Backoff {
+//         observed_at: Instant::now() - Duration::from_secs(31),
+//         duration: Duration::from_secs(30),
+//     });
+//     assert!(http_client.fetch_experiments().is_ok());
+//     m.expect(1).assert();
+// }
 
 fn response_body() -> String {
     format!(

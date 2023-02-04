@@ -1,5 +1,3 @@
-use std::num::{ParseIntError};
-
 #[derive(Debug, thiserror::Error)]
 pub enum ClientError {
     #[error("Error sending request: {0}")]
@@ -10,8 +8,6 @@ pub enum ClientError {
     BackoffError(u64),
     #[error("Error in network response: {0}")]
     ResponseError(String),
-    // #[error("ParseIntError: {0}")]
-    // ParseIntError(#[from] ParseIntError),
 }
 
 pub type Result<T, E = ClientError> = std::result::Result<T, E>;

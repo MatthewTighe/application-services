@@ -1,5 +1,5 @@
 pub mod http_client;
-mod error;
+pub mod error;
 pub mod config;
 
 #[cfg(test)]
