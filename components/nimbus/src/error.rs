@@ -9,6 +9,7 @@
 //! impl std::error::Error using `thiserror` and ensuring all errors are handled appropriately
 
 use std::num::{ParseIntError, TryFromIntError};
+
 #[derive(Debug, thiserror::Error)]
 pub enum NimbusError {
     #[error("Invalid persisted data")]
@@ -63,6 +64,8 @@ pub enum NimbusError {
     ParseIntError(#[from] ParseIntError),
     #[error("Transform parameter error: {0}")]
     TransformParameterError(String),
+    #[error("Error with HTTP client: {0}")]
+    ClientError(#[from] rs_client::error::ClientError),
 }
 
 #[derive(Debug, thiserror::Error)]

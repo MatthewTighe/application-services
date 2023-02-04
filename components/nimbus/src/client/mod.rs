@@ -9,7 +9,8 @@ use crate::error::{NimbusError, Result};
 use crate::Experiment;
 use crate::RemoteSettingsConfig;
 use fs_client::FileSystemClient;
-use http_client::Client;
+use rs_client::config::ClientConfig;
+use rs_client::http_client::*;
 use null_client::NullClient;
 use url::Url;
 
@@ -33,7 +34,7 @@ pub(crate) fn create_client(
                 };
                 Box::new(FileSystemClient::new(path)?)
             } else {
-                Box::new(Client::new(config)?)
+                Box::new(Client::new(config.to_client_config())?)
             }
         }
         // If no server is provided, then we still want Nimbus to work, but serving
@@ -47,3 +48,10 @@ pub(crate) trait SettingsClient {
     fn get_experiments_metadata(&self) -> Result<String>;
     fn fetch_experiments(&self) -> Result<Vec<Experiment>>;
 }
+
+impl RemoteSettingsConfig {
+    fn to_client_config(&self) -> ClientConfig {
+        todo!()
+    }
+}
+

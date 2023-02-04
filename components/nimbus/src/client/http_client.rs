@@ -15,93 +15,93 @@
 
 use std::time::{Duration, Instant};
 
-use crate::config::RemoteSettingsConfig;
 use crate::error::{NimbusError, Result};
 use crate::{Experiment, SettingsClient, SCHEMA_VERSION};
 use std::cell::Cell;
 use url::Url;
 use viaduct::{status_codes, Request, Response};
+use rs_client::{http_client::*, config::ClientConfig};
 
 const HEADER_BACKOFF: &str = "Backoff";
 const HEADER_RETRY_AFTER: &str = "Retry-After";
 
-pub struct Client {
-    pub(crate) base_url: Url,
-    pub(crate) collection_name: String,
-    pub(crate) remote_state: Cell<RemoteState>,
-}
+// pub struct Client {
+//     pub(crate) base_url: Url,
+//     pub(crate) collection_name: String,
+//     pub(crate) remote_state: Cell<RemoteState>,
+// }
 
-#[derive(Clone, Copy, Debug)]
-pub(crate) enum RemoteState {
-    Ok,
-    Backoff {
-        observed_at: Instant,
-        duration: Duration,
-    },
-}
+// #[derive(Clone, Copy, Debug)]
+// pub(crate) enum RemoteState {
+//     Ok,
+//     Backoff {
+//         observed_at: Instant,
+//         duration: Duration,
+//     },
+// }
 
-impl Client {
-    #[allow(unused)]
-    pub fn new(config: RemoteSettingsConfig) -> Result<Self> {
-        let base_url = Url::parse(&config.server_url)?;
-        Ok(Self {
-            base_url,
-            collection_name: config.collection_name,
-            remote_state: Cell::new(RemoteState::Ok),
-        })
-    }
+// impl Client {
+//     #[allow(unused)]
+//     pub fn new(config: RemoteSettingsConfig) -> Result<Self> {
+//         let base_url = Url::parse(&config.server_url)?;
+//         Ok(Self {
+//             base_url,
+//             collection_name: config.collection_name,
+//             remote_state: Cell::new(RemoteState::Ok),
+//         })
+//     }
 
-    fn make_request(&self, request: Request) -> Result<Response> {
-        self.ensure_no_backoff()?;
-        let resp = request.send()?;
-        self.handle_backoff_hint(&resp)?;
-        if resp.is_success() || resp.status == status_codes::NOT_MODIFIED {
-            Ok(resp)
-        } else {
-            Err(NimbusError::ResponseError(resp.text().to_string()))
-        }
-    }
+//     fn make_request(&self, request: Request) -> Result<Response> {
+//         self.ensure_no_backoff()?;
+//         let resp = request.send()?;
+//         self.handle_backoff_hint(&resp)?;
+//         if resp.is_success() || resp.status == status_codes::NOT_MODIFIED {
+//             Ok(resp)
+//         } else {
+//             Err(NimbusError::ResponseError(resp.text().to_string()))
+//         }
+//     }
 
-    fn ensure_no_backoff(&self) -> Result<()> {
-        if let RemoteState::Backoff {
-            observed_at,
-            duration,
-        } = self.remote_state.get()
-        {
-            let elapsed_time = observed_at.elapsed();
-            if elapsed_time >= duration {
-                self.remote_state.replace(RemoteState::Ok);
-            } else {
-                let remaining = duration - elapsed_time;
-                return Err(NimbusError::BackoffError(remaining.as_secs()));
-            }
-        }
-        Ok(())
-    }
+//     fn ensure_no_backoff(&self) -> Result<()> {
+//         if let RemoteState::Backoff {
+//             observed_at,
+//             duration,
+//         } = self.remote_state.get()
+//         {
+//             let elapsed_time = observed_at.elapsed();
+//             if elapsed_time >= duration {
+//                 self.remote_state.replace(RemoteState::Ok);
+//             } else {
+//                 let remaining = duration - elapsed_time;
+//                 return Err(NimbusError::BackoffError(remaining.as_secs()));
+//             }
+//         }
+//         Ok(())
+//     }
 
-    fn handle_backoff_hint(&self, response: &Response) -> Result<()> {
-        let extract_backoff_header = |header| -> Result<u64> {
-            Ok(response
-                .headers
-                .get_as::<u64, _>(header)
-                .transpose()
-                .unwrap_or_default() // Ignore number parsing errors.
-                .unwrap_or(0))
-        };
-        // In practice these two headers are mutually exclusive.
-        let backoff = extract_backoff_header(HEADER_BACKOFF)?;
-        let retry_after = extract_backoff_header(HEADER_RETRY_AFTER)?;
-        let max_backoff = backoff.max(retry_after);
+//     fn handle_backoff_hint(&self, response: &Response) -> Result<()> {
+//         let extract_backoff_header = |header| -> Result<u64> {
+//             Ok(response
+//                 .headers
+//                 .get_as::<u64, _>(header)
+//                 .transpose()
+//                 .unwrap_or_default() // Ignore number parsing errors.
+//                 .unwrap_or(0))
+//         };
+//         // In practice these two headers are mutually exclusive.
+//         let backoff = extract_backoff_header(HEADER_BACKOFF)?;
+//         let retry_after = extract_backoff_header(HEADER_RETRY_AFTER)?;
+//         let max_backoff = backoff.max(retry_after);
 
-        if max_backoff > 0 {
-            self.remote_state.replace(RemoteState::Backoff {
-                observed_at: Instant::now(),
-                duration: Duration::from_secs(max_backoff),
-            });
-        }
-        Ok(())
-    }
-}
+//         if max_backoff > 0 {
+//             self.remote_state.replace(RemoteState::Backoff {
+//                 observed_at: Instant::now(),
+//                 duration: Duration::from_secs(max_backoff),
+//             });
+//         }
+//         Ok(())
+//     }
+// }
 
 impl SettingsClient for Client {
     fn get_experiments_metadata(&self) -> Result<String> {
@@ -109,13 +109,20 @@ impl SettingsClient for Client {
     }
 
     fn fetch_experiments(&self) -> Result<Vec<Experiment>> {
-        let path = format!(
-            "v1/buckets/main/collections/{}/records",
-            &self.collection_name
-        );
-        let url = self.base_url.join(&path)?;
-        let req = Request::get(url);
-        let resp = self.make_request(req)?;
+        // let path = format!(
+        //     "v1/buckets/main/collections/{}/records",
+        //     &self.collection_name
+        // );
+        // let url = self.base_url.join(&path)?;
+        // let req = Request::get(url);
+        // TODO server url
+        let config = ClientConfig {
+            server_url: None,
+            bucket_name: None,
+            collection_name: String::from(""),
+        };
+        let http_client = Client::new(config).unwrap();
+        let resp = http_client.get()?;
         parse_experiments(&resp.text())
     }
 }
