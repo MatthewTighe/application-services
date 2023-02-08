@@ -11,7 +11,7 @@ pub struct RemoteSettings {
 
 impl RemoteSettings {
 
-    pub fn new(config: Option<RemoteSettingsConfig>) -> Self {
+    pub fn new(_config: Option<RemoteSettingsConfig>) -> Self {
         todo!();
         // let config: RemoteSettingsConfig = config.unwrap_or_else(|| RemoteSettingsConfig { server_url: String::from(""), collection_name: String::from(""), bucket_name: Some(String::from("")) });
         // Self {

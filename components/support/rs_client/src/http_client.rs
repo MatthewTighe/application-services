@@ -48,7 +48,7 @@ impl Client {
 
         Ok(Self {
             base_url: Url::parse(&server_url)?,
-            bucket_name: bucket_name,
+            bucket_name,
             collection_name: config.collection_name,
             remote_state: Cell::new(RemoteState::Ok),
         })

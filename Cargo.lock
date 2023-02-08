@@ -1993,6 +1993,7 @@ dependencies = [
  "mockito",
  "once_cell",
  "rkv",
+ "rs_client",
  "serde",
  "serde_derive",
  "serde_json",
@@ -2811,6 +2812,7 @@ checksum = "a3f87b73ce11b1619a3c6332f45341e0047173771e8b8b73f87bfeefb7b56244"
 name = "remote_settings"
 version = "0.1.0"
 dependencies = [
+ "rs_client",
  "thiserror",
  "uniffi",
  "uniffi_build",
@@ -2895,6 +2897,17 @@ dependencies = [
  "thiserror",
  "url",
  "uuid",
+]
+
+[[package]]
+name = "rs_client"
+version = "0.1.0"
+dependencies = [
+ "mockito",
+ "thiserror",
+ "url",
+ "viaduct",
+ "viaduct-reqwest",
 ]
 
 [[package]]
